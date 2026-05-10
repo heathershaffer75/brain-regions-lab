@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Brain Regions Lab</title>
+  <style>
+    :root {
+      --bg: #f5f1ea;
+      --panel: #fffaf2;
+      --ink: #2f2a27;
+      --muted: #6f625b;
+      --accent: #7a8f79;
+      --accent-dark: #52684f;
+      --soft-blue: #dfeaf0;
+      --soft-pink: #f2dede;
+      --soft-gold: #f4dfb5;
+      --soft-green: #dce8d8;
+      --soft-purple: #e4dff0;
+      --danger: #b76e65;
+      --shadow: 0 12px 30px rgba(47, 42, 39, 0.12);
+      --radius: 22px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      background: radial-gradient(circle at top left, #fff8ec, var(--bg));
+      color: var(--ink);
+      line-height: 1.5;
+    }
+
+    header {
+      padding: 36px 22px 22px;
+      text-align: center;
+    }
+
+    .eyebrow {
+      display: inline-block;
+      background: var(--soft-green);
+      color: var(--accent-dark);
+      padding: 7px 14px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: bold;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2.2rem, 6vw, 4.5rem);
+      line-height: 1;
+    }
+
+    .subtitle {
+      max-width: 760px;
+      margin: 18px auto 0;
+      font-size: clamp(1rem, 2.5vw, 1.25rem);
+      color: var(--muted);
+    }
+
+    .container {
+      width: min(1180px, calc(100% - 28px));
+      margin: 0 auto 42px;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 22px;
+      align-items: stretch;
+    }
+
+    .card {
+      background: rgba(255, 250, 242, 0.92);
+      border: 1px solid rgba(122, 143, 121, 0.25);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 22px;
+    }
+
+    .brain-card {
+      min-height: 560px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .brain-wrap {
+      position: relative;
+      min-height: 420px;
+      border-radius: 24px;
+      background:
+        radial-gradient(circle at 42% 35%, rgba(244, 223, 181, 0.9), transparent 32%),
+        radial-gradient(circle at 58% 50%, rgba(223, 234, 240, 0.95), transparent 36%),
+        linear-gradient(145deg, #fff7e9, #edf3ea);
+      overflow: hidden;
+      border: 1px solid rgba(82, 104, 79, 0.18);
+    }
+
+    .brain-svg {
+      width: 100%;
+      height: 420px;
+      display: block;
+    }
+
+    .region {
+      cursor: pointer;
+      transition: transform 0.2s ease, opacity 0.2s ease;
+      transform-origin: center;
+    }
+
+    .region:hover, .region.active {
+      transform: scale(1.04);
+      opacity: 0.9;
+    }
+
+    .region-label {
+      font-family: Arial, sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      pointer-events: none;
+      fill: #2f2a27;
+    }
+
+    .hint {
+      font-size: 0.95rem;
+      color: var(--muted);
+      margin: 12px 0 0;
+    }
+
+    .mode-row, .symptom-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 999px;
+      padding: 10px 14px;
+      font-size: 0.95rem;
+      cursor: pointer;
+      background: #ece2d4;
+      color: var(--ink);
+      transition: transform 0.15s ease, background 0.15s ease;
+      font-family: Arial, sans-serif;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+    }
+
+    button.active {
+      background: var(--accent);
+      color: white;
+    }
+
+    .panel-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .panel-title h2 {
+      margin: 0;
+      font-size: clamp(1.7rem, 3vw, 2.4rem);
+    }
+
+    .tag {
+      font-family: Arial, sans-serif;
+      font-size: 0.78rem;
+      font-weight: bold;
+      color: var(--accent-dark);
+      background: var(--soft-green);
+      padding: 6px 10px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+
+    .region-subtitle {
+      font-size: 1.1rem;
+      color: var(--muted);
+      margin: 0 0 18px;
+    }
+
+    .section {
+      border-top: 1px solid rgba(47, 42, 39, 0.12);
+      padding-top: 14px;
+      margin-top: 14px;
+    }
+
+    .section h3 {
+      margin: 0 0 8px;
+      font-size: 1.08rem;
+    }
+
+    ul {
+      padding-left: 22px;
+      margin: 8px 0 0;
+    }
+
+    li {
+      margin: 5px 0;
+    }
+
+    .quote-box {
+      margin-top: 18px;
+      background: var(--soft-gold);
+      border-radius: 18px;
+      padding: 16px;
+      font-size: 1.05rem;
+      font-weight: bold;
+    }
+
+    .tools-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin-top: 22px;
+    }
+
+    .mini-title {
+      margin: 0 0 8px;
+      font-size: 1.35rem;
+    }
+
+    .symptom-output {
+      margin-top: 16px;
+      background: #ffffff99;
+      border: 1px solid rgba(47, 42, 39, 0.12);
+      border-radius: 18px;
+      padding: 15px;
+      min-height: 120px;
+    }
+
+    .reflection {
+      background: var(--soft-purple);
+      border-radius: 18px;
+      padding: 15px;
+      margin-top: 15px;
+    }
+
+    .footer-note {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.92rem;
+      max-width: 820px;
+      margin: 28px auto 0;
+    }
+
+    @media (max-width: 900px) {
+      .hero-grid, .tools-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .brain-card {
+        min-height: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="eyebrow">Interactive Recovery Neuroscience</div>
+    <h1>🧠 Brain Regions Lab</h1>
+    <p class="subtitle">Explore how trauma, attachment, chronic stress, and substance use can affect different parts of the brain, and how recovery helps the brain relearn safety, connection, and choice.</p>
+  </header>
+
+  <main class="container">
+    <section class="hero-grid">
+      <div class="card brain-card">
+        <div>
+          <h2 class="mini-title">Click a Brain Region</h2>
+          <p class="hint">This is a simplified teaching map, not a medical diagram. It is designed for group discussion and patient-friendly psychoeducation.</p>
+        </div>
+
+        <div class="brain-wrap" aria-label="Interactive brain map">
+          <svg class="brain-svg" viewBox="0 0 760 460" role="img" aria-labelledby="brainTitle">
+            <title id="brainTitle">Clickable brain region diagram</title>
+
+            <path d="M140,250 C110,150 190,70 300,80 C355,20 470,45 515,105 C615,95 695,175 675,285 C655,395 525,410 455,378 C390,430 260,410 230,340 C180,345 145,310 140,250 Z" fill="#f2dede" stroke="#6f625b" stroke-width="4" opacity="0.92" />
+
+            <ellipse class="region" data-region="pfc" cx="235" cy="185" rx="100" ry="88" fill="#dfeaf0" stroke="#52684f" stroke-width="3" />
+            <text class="region-label" x="185" y="185">Prefrontal</text>
+            <text class="region-label" x="200" y="202">Cortex</text>
+
+            <ellipse class="region" data-region="amygdala" cx="405" cy="275" rx="62" ry="44" fill="#f4dfb5" stroke="#52684f" stroke-width="3" />
+            <text class="region-label" x="370" y="280">Amygdala</text>
+
+            <ellipse class="region" data-region="hippocampus" cx="480" cy="315" rx="92" ry="38" fill="#dce8d8" stroke="#52684f" stroke-width="3" />
+            <text class="region-label" x="437" y="320">Hippocampus</text>
+
+            <ellipse class="region" data-region="insula" cx="375" cy="205" rx="72" ry="52" fill="#e4dff0" stroke="#52684f" stroke-width="3" />
+            <text class="region-label" x="348" y="210">Insula</text>
+
+            <ellipse class="region" data-region="cerebellum" cx="580" cy="340" rx="82" ry="55" fill="#ead8c7" stroke="#52684f" stroke-width="3" />
+            <text class="region-label" x="540" y="345">Cerebellum</text>
+
+            <ellipse class="region" data-region="nucleus" cx="420" cy="365" rx="68" ry="38" fill="#f1e4a8" stroke="#52684f" stroke-width="3" />
+            <text class="region-label" x="383" y="363">Nucleus</text>
+            <text class="region-label" x="380" y="379">Accumbens</text>
+
+            <rect class="region" data-region="brainstem" x="550" y="240" width="70" height="78" rx="34" fill="#d8e1d4" stroke="#52684f" stroke-width="3" />
+            <text class="region-label" x="553" y="283">Brainstem</text>
+          </svg>
+        </div>
+
+        <div>
+          <p class="hint"><strong>Group prompt:</strong> Which brain region helps explain something you have experienced in recovery, trauma, relationships, or emotional survival?</p>
+        </div>
+      </div>
+
+      <div class="card" id="regionPanel">
+        <div class="panel-title">
+          <h2 id="regionName">Amygdala</h2>
+          <span class="tag" id="regionTag">The Smoke Detector</span>
+        </div>
+        <p class="region-subtitle" id="regionSubtitle">This region helps detect threat, emotional intensity, and survival signals.</p>
+
+        <div class="section">
+          <h3>🎯 Main Job</h3>
+          <ul id="mainJob"></ul>
+        </div>
+
+        <div class="section">
+          <h3>⚠️ Trauma, Stress, or Attachment Impact</h3>
+          <ul id="traumaImpact"></ul>
+        </div>
+
+        <div class="section">
+          <h3>🍺 Substance Use Impact</h3>
+          <ul id="substanceImpact"></ul>
+        </div>
+
+        <div class="section">
+          <h3>🔄 Common Real-Life Experiences</h3>
+          <ul id="commonExperiences"></ul>
+        </div>
+
+        <div class="section">
+          <h3>🛠️ Healing & Recovery Supports</h3>
+          <ul id="healingSupports"></ul>
+        </div>
+
+        <div class="quote-box" id="anchorMessage"></div>
+      </div>
+    </section>
+
+    <section class="tools-grid">
+      <div class="card">
+        <h2 class="mini-title">🔎 Symptom Explorer</h2>
+        <p class="hint">Choose a common experience and explore which brain systems may be involved.</p>
+        <div class="symptom-row" id="symptomButtons"></div>
+        <div class="symptom-output" id="symptomOutput">
+          Choose a symptom to begin.
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="mini-title">🎮 Learning Mode</h2>
+        <p class="hint">Choose a lens for group discussion. The brain region information stays the same, but the reflection question changes.</p>
+        <div class="mode-row" id="modeButtons"></div>
+        <div class="reflection" id="modeReflection"></div>
+      </div>
+    </section>
+
+    <p class="footer-note">Educational tool only. This activity is not medical advice, diagnosis, or treatment. It is designed to support discussion, insight, emotional regulation, recovery education, and trauma-informed self-understanding.</p>
+  </main>
+
+  <script>
+    const regions = {
+      amygdala: {
+        name: "Amygdala",
+        tag: "The Smoke Detector",
+        subtitle: "This region helps detect threat, emotional intensity, and survival signals.",
+        mainJob: ["Scans for danger", "Helps activate fight, flight, freeze, or fawn responses", "Tags experiences as emotionally important", "Learns fear and safety cues"],
+        traumaImpact: ["May become extra sensitive after trauma or chronic stress", "Can make neutral situations feel threatening", "May trigger emotional flooding before logic catches up", "Attachment wounds can train the brain to scan relationships for rejection or abandonment"],
+        substanceImpact: ["Substances may temporarily quiet fear, panic, shame, or overwhelm", "Rebound anxiety can make the alarm system feel even louder later", "Repeated use can reinforce the pattern of escaping emotional activation", "Withdrawal and kindling can increase threat sensitivity over time"],
+        commonExperiences: ["I overreact before I can think", "My body says I am unsafe even when my mind knows I am okay", "I am always scanning for what could go wrong", "I feel hijacked by fear, anger, or panic"],
+        healingSupports: ["Predictable routines", "Grounding skills", "Slow breathing", "Safe relationships", "Trauma therapy", "Sleep and nervous system recovery", "Practicing pause time before reacting"],
+        anchor: "Your alarm system adapted to protect you. Recovery helps it learn when the danger has passed."
+      },
+      pfc: {
+        name: "Prefrontal Cortex",
+        tag: "The Wise Decision-Maker",
+        subtitle: "This area supports planning, impulse control, emotional regulation, and future thinking.",
+        mainJob: ["Helps with decision-making", "Supports impulse control", "Thinks about future consequences", "Helps regulate emotions", "Allows reflection before action"],
+        traumaImpact: ["High stress can reduce access to logical thinking", "Survival mode can make long-term planning harder", "Trauma reminders may shift the brain from reflection into reaction", "Attachment insecurity can make relationship stress feel urgent and overwhelming"],
+        substanceImpact: ["Intoxication can weaken judgment and inhibition", "Cravings can overpower future-based thinking", "Repeated substance use can strengthen automatic behavior patterns", "Early recovery may involve brain fog, low motivation, and slower decision-making"],
+        commonExperiences: ["I know what I should do, but I cannot seem to do it", "I make choices in the moment that I regret later", "When I am stressed, I cannot think clearly", "My future self disappears when the craving hits"],
+        healingSupports: ["Delay skills", "Written plans", "Accountability", "Mindfulness", "CBT thought-checking", "Values-based choices", "Exercise", "Reducing sleep deprivation and stress overload"],
+        anchor: "The thinking brain comes back online through safety, repetition, structure, and practice."
+      },
+      hippocampus: {
+        name: "Hippocampus",
+        tag: "Memory & Emotional Time Travel",
+        subtitle: "This region helps organize memory, context, and the sense of past versus present.",
+        mainJob: ["Forms and organizes memories", "Helps place experiences in time and context", "Supports learning from experience", "Helps the brain know, that was then, this is now"],
+        traumaImpact: ["Trauma memories may feel fragmented or sensory-based", "Past danger can feel present", "Stress hormones can interfere with memory processing", "Triggers may activate old emotional memory before conscious awareness"],
+        substanceImpact: ["Alcohol and other substances can impair memory formation", "Blackouts involve disruption of memory encoding", "Chronic stress and substance use can affect learning and recall", "Early recovery may involve confusion, forgetfulness, or emotional memory floods"],
+        commonExperiences: ["I remember pieces, but not the whole thing", "Something small brings me right back to the past", "I cannot explain why I suddenly feel terrified or ashamed", "My memory gets worse when I am overwhelmed"],
+        healingSupports: ["Grounding in the present", "Journaling", "Narrative work", "Therapy", "Sleep", "Sobriety", "Safe repetition", "Naming, that was then, this is now"],
+        anchor: "Healing helps the brain file painful memories as memories, instead of reliving them as emergencies."
+      },
+      insula: {
+        name: "Insula",
+        tag: "The Feeling Brain",
+        subtitle: "This region helps you notice body sensations, internal signals, cravings, and emotional states.",
+        mainJob: ["Tracks body sensations", "Helps identify internal states", "Connects emotions to physical feelings", "Plays a role in cravings, disgust, anxiety, and gut feelings"],
+        traumaImpact: ["May become overly sensitive to body sensations", "May disconnect from the body during shutdown or dissociation", "Can contribute to panic when normal sensations feel dangerous", "Attachment trauma may create confusion around needs, boundaries, and body signals"],
+        substanceImpact: ["Cravings can feel physical and urgent", "Substances may be used to numb body-based distress", "Withdrawal can amplify uncomfortable internal sensations", "Early recovery may bring unfamiliar feelings back online"],
+        commonExperiences: ["I feel cravings in my body", "I feel numb or disconnected", "My anxiety starts as a physical sensation", "I do not know what I feel until it becomes overwhelming"],
+        healingSupports: ["Body scans", "Gentle movement", "Naming sensations", "Mindfulness", "Interoception practice", "Somatic grounding", "Learning to notice needs earlier"],
+        anchor: "The body carries information. Recovery helps you listen without being ruled by the alarm."
+      },
+      cerebellum: {
+        name: "Cerebellum",
+        tag: "Coordination & Automatic Patterns",
+        subtitle: "This region supports movement, timing, coordination, and some automatic patterns.",
+        mainJob: ["Coordinates movement", "Helps with timing and balance", "Supports automatic learned patterns", "May contribute to cognitive and emotional timing"],
+        traumaImpact: ["Chronic stress can affect coordination between body, emotion, and reaction", "Survival patterns can become automatic", "The body may react before conscious thought catches up"],
+        substanceImpact: ["Alcohol strongly affects balance and coordination", "Long-term heavy alcohol use can harm cerebellar functioning", "Substance use can strengthen automatic behavioral loops", "Early recovery may require relearning steadier rhythms"],
+        commonExperiences: ["I go on autopilot", "My body reacts before I decide", "I feel clumsy or foggy after heavy use", "I fall into old patterns without noticing"],
+        healingSupports: ["Repetition of new habits", "Exercise", "Balance and coordination activities", "Sleep", "Sobriety", "Slow practice", "Building new automatic routines"],
+        anchor: "Recovery is not just thinking differently. It is practicing new patterns until they become easier to access."
+      },
+      nucleus: {
+        name: "Nucleus Accumbens",
+        tag: "Reward & Motivation Hub",
+        subtitle: "This region is part of the brain’s reward, motivation, and reinforcement system.",
+        mainJob: ["Helps process reward", "Supports motivation and wanting", "Learns what feels important", "Plays a major role in reinforcement and habit loops"],
+        traumaImpact: ["Stress can shift the brain toward quick relief", "Low safety and low pleasure can make intense rewards more appealing", "Attachment pain can increase the drive for relief, comfort, or escape"],
+        substanceImpact: ["Many substances create powerful reward signals", "Repeated use can make everyday rewards feel dull", "Cravings can become linked to cues, places, people, and emotions", "Early recovery can include anhedonia, boredom, or low motivation"],
+        commonExperiences: ["Nothing feels fun anymore", "I want relief more than I want my goals", "Boredom feels unbearable", "My brain keeps chasing the fastest reward"],
+        healingSupports: ["Behavioral activation", "Small healthy rewards", "Exercise", "Connection", "Creative activities", "Novelty without chaos", "Building pleasure slowly over time"],
+        anchor: "The reward system can heal, but it often needs small, repeated proof that life can feel good without substances."
+      },
+      brainstem: {
+        name: "Brainstem",
+        tag: "Basic Survival System",
+        subtitle: "This region helps regulate basic survival functions and automatic body responses.",
+        mainJob: ["Supports breathing and heart rate", "Helps regulate arousal", "Connects brain and body survival responses", "Supports automatic protective reactions"],
+        traumaImpact: ["May shift quickly into fight, flight, freeze, or shutdown", "Can make stress feel physical and immediate", "Trauma responses may happen before words or logic appear"],
+        substanceImpact: ["Some substances affect breathing, arousal, and consciousness", "Withdrawal can dysregulate basic body rhythms", "The nervous system may swing between overactivation and exhaustion"],
+        commonExperiences: ["My body reacts before I understand why", "I freeze or shut down", "My heart races and I cannot calm down", "I feel either wired or completely depleted"],
+        healingSupports: ["Breathing practices", "Grounding", "Medical support when needed", "Consistent sleep", "Reduced stimulant overload", "Safe connection", "Rhythm, routine, and regulation"],
+        anchor: "Sometimes healing begins with helping the body feel safe enough to come out of survival mode."
+      }
+    };
+
+    const symptoms = {
+      "Panic": {
+        regions: "Amygdala, Insula, Brainstem, Prefrontal Cortex",
+        explanation: "Panic often involves a loud threat alarm, intense body sensations, survival activation, and reduced access to calm logical thinking.",
+        prompt: "What helps your body receive the message, I am safe enough right now?"
+      },
+      "Cravings": {
+        regions: "Nucleus Accumbens, Insula, Prefrontal Cortex, Amygdala",
+        explanation: "Cravings can involve reward memory, body sensations, stress activation, and a temporary drop in future-focused thinking.",
+        prompt: "Where do cravings show up first, body, thought, emotion, or behavior?"
+      },
+      "Emotional Flooding": {
+        regions: "Amygdala, Prefrontal Cortex, Brainstem",
+        explanation: "Emotional flooding can happen when the survival system activates faster than the thinking brain can organize the experience.",
+        prompt: "What is one small pause you could practice before reacting?"
+      },
+      "Numbness": {
+        regions: "Insula, Brainstem, Prefrontal Cortex",
+        explanation: "Numbness can be a protective shutdown response. The brain may reduce feeling when feeling everything would seem too overwhelming.",
+        prompt: "What gentle signal tells you that feeling is starting to come back online?"
+      },
+      "Brain Fog": {
+        regions: "Prefrontal Cortex, Hippocampus, Brainstem",
+        explanation: "Brain fog can reflect stress overload, poor sleep, early recovery, withdrawal effects, or the thinking brain being under-resourced.",
+        prompt: "What basic need might your brain be asking for, sleep, food, safety, structure, or support?"
+      },
+      "Hypervigilance": {
+        regions: "Amygdala, Hippocampus, Brainstem",
+        explanation: "Hypervigilance is the brain scanning for danger. It often makes sense after trauma, chaos, unsafe relationships, or chronic stress.",
+        prompt: "What would help your nervous system update its safety information today?"
+      },
+      "Impulsivity": {
+        regions: "Prefrontal Cortex, Nucleus Accumbens, Amygdala",
+        explanation: "Impulsivity often happens when reward, relief, or threat urgency gets louder than future-based decision-making.",
+        prompt: "What delay tool could help you create space between urge and action?"
+      },
+      "Shame Spiral": {
+        regions: "Amygdala, Insula, Prefrontal Cortex, Hippocampus",
+        explanation: "Shame can feel like a whole-brain threat state, involving body sensations, painful memory, social fear, and harsh self-judgment.",
+        prompt: "What would change if shame were treated as a signal instead of a sentence?"
+      }
+    };
+
+    const modes = {
+      "General": "What brain region helps explain something you have experienced, and what would support healing in that area?",
+      "Trauma": "Where do you notice survival responses showing up, fight, flight, freeze, fawn, or shutdown?",
+      "SUD": "How might substance use have been an attempt to regulate, numb, energize, escape, or survive?",
+      "Attachment": "How do safety, trust, rejection, closeness, or abandonment show up in your nervous system?",
+      "Recovery": "What repeated recovery action could help this brain system relearn safety, reward, or choice?"
+    };
+
+    const regionName = document.getElementById("regionName");
+    const regionTag = document.getElementById("regionTag");
+    const regionSubtitle = document.getElementById("regionSubtitle");
+    const mainJob = document.getElementById("mainJob");
+    const traumaImpact = document.getElementById("traumaImpact");
+    const substanceImpact = document.getElementById("substanceImpact");
+    const commonExperiences = document.getElementById("commonExperiences");
+    const healingSupports = document.getElementById("healingSupports");
+    const anchorMessage = document.getElementById("anchorMessage");
+
+    function renderList(element, items) {
+      element.innerHTML = items.map(item => `<li>${item}</li>`).join("");
+    }
+
+    function renderRegion(key) {
+      const region = regions[key];
+      regionName.textContent = region.name;
+      regionTag.textContent = region.tag;
+      regionSubtitle.textContent = region.subtitle;
+      renderList(mainJob, region.mainJob);
+      renderList(traumaImpact, region.traumaImpact);
+      renderList(substanceImpact, region.substanceImpact);
+      renderList(commonExperiences, region.commonExperiences);
+      renderList(healingSupports, region.healingSupports);
+      anchorMessage.textContent = region.anchor;
+
+      document.querySelectorAll(".region").forEach(el => {
+        el.classList.toggle("active", el.dataset.region === key);
+      });
+    }
+
+    document.querySelectorAll(".region").forEach(region => {
+      region.addEventListener("click", () => renderRegion(region.dataset.region));
+    });
+
+    const symptomButtons = document.getElementById("symptomButtons");
+    const symptomOutput = document.getElementById("symptomOutput");
+
+    Object.keys(symptoms).forEach((symptom) => {
+      const btn = document.createElement("button");
+      btn.textContent = symptom;
+      btn.addEventListener("click", () => {
+        document.querySelectorAll("#symptomButtons button").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        const data = symptoms[symptom];
+        symptomOutput.innerHTML = `
+          <strong>${symptom}</strong><br><br>
+          <strong>Possible brain systems involved:</strong> ${data.regions}<br><br>
+          ${data.explanation}<br><br>
+          <em>Reflection:</em> ${data.prompt}
+        `;
+      });
+      symptomButtons.appendChild(btn);
+    });
+
+    const modeButtons = document.getElementById("modeButtons");
+    const modeReflection = document.getElementById("modeReflection");
+
+    Object.keys(modes).forEach((mode, index) => {
+      const btn = document.createElement("button");
+      btn.textContent = mode;
+      if (index === 0) btn.classList.add("active");
+      btn.addEventListener("click", () => {
+        document.querySelectorAll("#modeButtons button").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        modeReflection.innerHTML = `<strong>${mode} Mode Reflection:</strong><br>${modes[mode]}`;
+      });
+      modeButtons.appendChild(btn);
+    });
+
+    modeReflection.innerHTML = `<strong>General Mode Reflection:</strong><br>${modes.General}`;
+    renderRegion("amygdala");
+  </script>
+</body>
+</html>
